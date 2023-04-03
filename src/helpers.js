@@ -21,3 +21,5 @@ export async function fetchFromAPI(endpoint, options) {
 		throw new Error(error);
 	}
 }
+
+export function getRandomColor() {}

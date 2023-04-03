@@ -5,6 +5,7 @@ function storeAuthState(authState) {
 }
 
 const initialState = {
+	_id: '',
 	username: '',
 	email: '',
 	token: '',
@@ -22,11 +23,13 @@ export const authSlice = createSlice({
 	reducers: {
 		authenticate: (state, action) => {
 			storeAuthState(action.payload);
-			state = action.payload;
+			state = { ...action.payload };
+			return state;
 		},
 		logOut: (state) => {
 			state = initialState;
 			localStorage.removeItem('user');
+			return state;
 		},
 	},
 });

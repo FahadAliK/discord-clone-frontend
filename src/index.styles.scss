@@ -18,3 +18,36 @@ code {
 	padding: 1rem;
 	border-radius: 5px;
 }
+
+a {
+	text-decoration: none;
+	padding: 6px;
+	border-radius: 4px;
+}
+a:visited {
+	color: initial;
+}
+
+.active {
+	color: white !important;
+	background: linear-gradient(
+		90deg,
+		rgba(131, 58, 180, 1) 0%,
+		rgba(253, 29, 29, 1) 50%,
+		rgba(252, 176, 69, 1) 100%
+	);
+}
+
+.message-right {
+	background: rgb(252 176 69 / 45%);
+	border-radius: 20px;
+	width: 45% !important;
+	margin: 10px 0 10px 54%;
+}
+
+.message-left {
+	background: #1976d257;
+	border-radius: 20px;
+	width: 45% !important;
+	margin: 10px 10px;
+}

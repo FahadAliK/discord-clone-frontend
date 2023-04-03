@@ -14,15 +14,22 @@ import { fetchFromAPI } from '../helpers';
 
 export default function FormDialog({ open, handleClose }) {
 	const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
+	const [openSuccessSnackbar, setOpenSuccessSnackbar] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
+	const [successMessage, setSuccessMessage] = useState('');
 	const { email } = useSelector((state) => state.auth);
+	const { friends, invitations } = useSelector((state) => state.friends);
 	const initialValues = { email: '' };
 	async function handleSubmit(values, { setSubmitting }) {
 		setSubmitting(true);
 		const { email } = values;
 		const response = await fetchFromAPI('friends/invite', { body: { email } });
 		if (response.success) {
-			console.log(response);
+			setOpenSuccessSnackbar(true);
+			setSuccessMessage(response.message);
+			setTimeout(() => {
+				handleClose();
+			}, 1000);
 		} else {
 			setErrorMessage(response.error);
 			setOpenErrorSnackbar(true);
@@ -32,6 +39,19 @@ export default function FormDialog({ open, handleClose }) {
 		const errors = {};
 		if (values.email.toLowerCase() === email.toLowerCase()) {
 			errors.email = "You can't send invitation to yourself.";
+		}
+		const isAlreadyFriend = friends
+			.map((friend) => friend.email)
+			.find((email) => values.email.toLowerCase() === email);
+		if (isAlreadyFriend) {
+			errors.email = 'Friend already added, Please check friends list.';
+		}
+		const isAlreadyHaveInvitation = invitations
+			.map((invitaion) => invitaion.email)
+			.find((email) => values.email.toLowerCase() === email);
+		if (isAlreadyHaveInvitation) {
+			errors.email =
+				'You already have a pending invitain from this user, Please accept it or reject it.';
 		}
 		return errors;
 	}
@@ -50,6 +70,21 @@ export default function FormDialog({ open, handleClose }) {
 					sx={{ width: '100%' }}
 				>
 					{errorMessage}
+				</Alert>
+			</Snackbar>
+			<Snackbar
+				open={openSuccessSnackbar}
+				autoHideDuration={2000}
+				onClose={() => setOpenSuccessSnackbar(false)}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+			>
+				<Alert
+					variant="filled"
+					onClose={() => setOpenSuccessSnackbar(false)}
+					severity="success"
+					sx={{ width: '100%' }}
+				>
+					{successMessage}
 				</Alert>
 			</Snackbar>
 			<DialogTitle>Subscribe</DialogTitle>

@@ -2,8 +2,15 @@ import { io } from 'socket.io-client';
 
 const URL = 'http://localhost:5002';
 
+export let socket = null;
 export function connectSocket(token) {
-	const socket = io(URL, { auth: { token } });
+	// socket = io(URL, { auth: { token } });
+	socket = io(URL, {
+		extraHeaders: {
+			Authorization: token,
+		},
+	});
+
 	let socketId;
 	socket.on('connect', () => {
 		console.log(`Client successfully connected with ID ${socket.id}`);
@@ -15,4 +22,5 @@ export function connectSocket(token) {
 	socket.on('connect_error', (error) => {
 		console.log(error);
 	});
+	return socket;
 }

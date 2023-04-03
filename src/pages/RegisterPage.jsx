@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { authenticate } from '../features/auth/authSlice';
 import AuthBox from '../shared/AuthBox';
 import {
@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Formik } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { redirect, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { fetchFromAPI } from '../helpers';
 
@@ -23,6 +23,7 @@ function RegisterPage() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+
 	const initialValues = {
 		username: '',
 		email: '',
@@ -35,9 +36,9 @@ function RegisterPage() {
 			body: { username, email, password },
 		});
 		if (response.success) {
-			dispatch(authenticate(response));
 			setOpenSuccessSnackbar(true);
-			navigate('/dashboard');
+			dispatch(authenticate(response));
+			navigate('/');
 		} else {
 			setErrorMessage(response.error);
 			setOpenErrorSnackbar(true);

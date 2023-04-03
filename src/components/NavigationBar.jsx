@@ -11,6 +11,7 @@ import {
 	Menu,
 	MenuItem,
 	Button,
+	Avatar,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import MailIcon from '@mui/icons-material/Mail';
@@ -19,10 +20,13 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
 import TemporaryDrawer from './TemporaryDrawer';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logOut } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { deepOrange } from '@mui/material/colors';
+import { socket } from '../socket';
 
+const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 const Search = styled('div')(({ theme }) => ({
 	position: 'relative',
 	borderRadius: theme.shape.borderRadius,
@@ -64,9 +68,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function NavigationBar() {
+	const { username, email } = useSelector((state) => state.auth);
 	const navigate = useNavigate();
 	const [openDrawer, setOpenDrawer] = useState(false);
 	const dispatch = useDispatch();
+	const [openProfile, setOpenProfile] = useState(null);
 
 	const toggleDrawer = (open) => {
 		setOpenDrawer(open);
@@ -111,8 +117,26 @@ function NavigationBar() {
 			open={isMenuOpen}
 			onClose={handleMenuClose}
 		>
-			<MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-			<MenuItem onClick={handleMenuClose}>My account</MenuItem>
+			<MenuItem>
+				<Typography variant="overline" display="block" gutterBottom>
+					Email: {email}
+				</Typography>
+			</MenuItem>
+			<MenuItem>
+				<Typography variant="overline" display="block" gutterBottom>
+					Username: {username}
+				</Typography>
+			</MenuItem>
+			<MenuItem
+				onClick={() => {
+					socket.disconnect();
+					handleMenuClose();
+					dispatch(logOut());
+					navigate('/login');
+				}}
+			>
+				Logout
+			</MenuItem>
 		</Menu>
 	);
 
@@ -171,8 +195,8 @@ function NavigationBar() {
 	return (
 		<Box sx={{ flexGrow: 1 }}>
 			<TemporaryDrawer openDrawer={openDrawer} toggleDrawer={toggleDrawer} />
-			<AppBar position="static">
-				<Toolbar>
+			<AppBar position="fixed">
+				<Toolbar sx={{ background: '' }} className="linear-gradient">
 					<IconButton
 						onClick={() => {
 							toggleDrawer(true);
@@ -222,16 +246,22 @@ function NavigationBar() {
 								<NotificationsIcon />
 							</Badge>
 						</IconButton>
-
-						<Button
+						<IconButton
+							size="large"
+							edge="end"
+							aria-label="account of current user"
+							aria-controls={menuId}
+							aria-haspopup="true"
+							onClick={handleProfileMenuOpen}
 							color="inherit"
-							onClick={() => {
-								dispatch(logOut());
-								navigate('/login');
-							}}
 						>
-							Logout
-						</Button>
+							{/* <AccountCircle /> */}
+							{/* <Avatar {...stringAvatar(username)} /> */}
+
+							<Avatar sx={{ background: randomColor }}>
+								{username.slice(0, 2)}
+							</Avatar>
+						</IconButton>
 					</Box>
 					<Box sx={{ display: { xs: 'flex', md: 'none' } }}>
 						<IconButton
@@ -247,6 +277,7 @@ function NavigationBar() {
 					</Box>
 				</Toolbar>
 			</AppBar>
+			<Toolbar />
 			{renderMobileMenu}
 			{renderMenu}
 		</Box>

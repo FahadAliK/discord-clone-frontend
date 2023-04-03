@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Formik } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { redirect, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { fetchFromAPI } from '../helpers';
 import { useDispatch } from 'react-redux';
@@ -23,6 +23,7 @@ function LoginPage() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+
 	const initialValues = {
 		email: '',
 		password: '',
@@ -34,12 +35,12 @@ function LoginPage() {
 			body: { email, password },
 		});
 		if (response.success) {
-			dispatch(authenticate(response));
 			setOpenSuccessSnackbar(true);
-			navigate('/dashboard');
+			dispatch(authenticate(response));
+			navigate('/');
 		} else {
-			setErrorMessage(response.error);
 			setOpenErrorSnackbar(true);
+			setErrorMessage(response.error);
 		}
 	}
 	return (
