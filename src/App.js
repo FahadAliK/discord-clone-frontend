@@ -11,24 +11,29 @@ import { connectSocket } from './socket';
 import { setFriends, setInvitations } from './features/friends/friendsSlice';
 import AvatarWithIndicator from './components/AvatarWithIndicator';
 import AuthBox from './shared/AuthBox';
-import { setChatMessages } from './features/chat/chatSlice';
+import { setChatMessages, setChatUser } from './features/chat/chatSlice';
+import { useEffect } from 'react';
 
 function App() {
 	const { token } = useSelector((state) => state.auth);
+	const { messages } = useSelector((state) => state.chat);
 	const dispatch = useDispatch();
-	if (token) {
-		const socket = connectSocket(token);
-		socket.on('friends-invitations', (invitations) => {
-			dispatch(setInvitations(invitations));
-		});
-		socket.on('friends-list', (friends) => {
-			dispatch(setFriends(friends));
-		});
-		socket.on('new-messages', (data) => {
-			// console.log(data);
-			dispatch(setChatMessages(data.messages));
-		});
-	}
+	useEffect(() => {
+		if (token) {
+			const socket = connectSocket(token);
+			socket.on('friends-invitations', (invitations) => {
+				dispatch(setInvitations(invitations));
+			});
+			socket.on('friends-list', (friends) => {
+				dispatch(setFriends(friends));
+			});
+			socket.on('new-messages', (data) => {
+				// console.log(data);
+				// dispatch(setChatMessages(data.messages));
+				dispatch(setChatMessages(data));
+			});
+		}
+	}, [token, dispatch]);
 	return (
 		<div className="App">
 			<Router>

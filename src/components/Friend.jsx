@@ -8,9 +8,9 @@ import {
 	Card,
 } from '@mui/material';
 import AvatarWithIndicator from './AvatarWithIndicator';
-import { redirect, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { setChatMessages, setChatUser } from '../features/chat/chatSlice';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setChatUser } from '../features/chat/chatSlice';
 
 export default function Friend({ friend }) {
 	const dispatch = useDispatch();
@@ -30,7 +30,6 @@ export default function Friend({ friend }) {
 				<Button
 					variant="contained"
 					onClick={() => {
-						console.log('inhere');
 						dispatch(setChatUser(friend));
 						navigate('/dashboard');
 					}}

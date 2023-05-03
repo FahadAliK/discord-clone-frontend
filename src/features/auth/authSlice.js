@@ -11,6 +11,7 @@ const initialState = {
 	token: '',
 	success: false,
 	message: '',
+	imageUrl: '',
 };
 
 const authStateFormStorage = localStorage.getItem('user')

@@ -54,7 +54,7 @@ export default function AvatarWithIndicator({ friend }) {
 		>
 			<Avatar
 				alt={friend.username}
-				src="/static/images/avatar/1.jpg"
+				src={friend.imageUrl}
 				sx={{ width: 56, height: 56 }}
 			/>
 		</StyledBadge>

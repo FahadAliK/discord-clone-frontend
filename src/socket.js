@@ -22,5 +22,8 @@ export function connectSocket(token) {
 	socket.on('connect_error', (error) => {
 		console.log(error);
 	});
+	socket.on('error', (error) => {
+		console.log(error);
+	});
 	return socket;
 }

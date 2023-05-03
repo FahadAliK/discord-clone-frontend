@@ -4,6 +4,7 @@ const initialState = {
 	chosenChatUser: null,
 	messages: [],
 	chatType: null,
+	conversation: null,
 };
 
 export const chatSlice = createSlice({
@@ -16,12 +17,17 @@ export const chatSlice = createSlice({
 			return state;
 		},
 		setChatMessages: (state, action) => {
-			state.messages = action.payload;
+			state.messages.push(action.payload);
+			return state;
+		},
+		setConversation: (state, action) => {
+			state.conversation = action.payload;
 			return state;
 		},
 	},
 });
 
-export const { setChatUser, setChatMessages } = chatSlice.actions;
+export const { setChatUser, setChatMessages, setConversation } =
+	chatSlice.actions;
 
 export default chatSlice.reducer;

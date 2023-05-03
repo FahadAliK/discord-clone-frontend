@@ -23,10 +23,8 @@ import TemporaryDrawer from './TemporaryDrawer';
 import { useDispatch, useSelector } from 'react-redux';
 import { logOut } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { deepOrange } from '@mui/material/colors';
 import { socket } from '../socket';
 
-const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 const Search = styled('div')(({ theme }) => ({
 	position: 'relative',
 	borderRadius: theme.shape.borderRadius,
@@ -68,7 +66,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function NavigationBar() {
-	const { username, email } = useSelector((state) => state.auth);
+	const { username, email, imageUrl } = useSelector((state) => state.auth);
 	const navigate = useNavigate();
 	const [openDrawer, setOpenDrawer] = useState(false);
 	const dispatch = useDispatch();
@@ -255,12 +253,7 @@ function NavigationBar() {
 							onClick={handleProfileMenuOpen}
 							color="inherit"
 						>
-							{/* <AccountCircle /> */}
-							{/* <Avatar {...stringAvatar(username)} /> */}
-
-							<Avatar sx={{ background: randomColor }}>
-								{username.slice(0, 2)}
-							</Avatar>
+							<Avatar src={imageUrl} alt={username} />
 						</IconButton>
 					</Box>
 					<Box sx={{ display: { xs: 'flex', md: 'none' } }}>

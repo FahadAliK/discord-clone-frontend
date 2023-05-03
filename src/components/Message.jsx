@@ -1,12 +1,17 @@
 import React from 'react';
 import { ListItem, Grid, ListItemText } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
-export default function Message({ message }) {
-	const { _id, username, email } = useSelector((state) => state.auth);
+import { useSelector } from 'react-redux';
+export default function Message({ message, className }) {
+	const { _id } = useSelector((state) => state.auth);
+	const classNames = [];
+	classNames.push(className);
+	if (message.from === _id) {
+		classNames.push('message-left');
+	} else {
+		classNames.push('message-right');
+	}
 	return (
-		<ListItem
-			className={message.from === _id ? 'message-left' : 'message-right'}
-		>
+		<ListItem className={classNames.join(' ')}>
 			<Grid container>
 				<Grid item xs={12}>
 					<ListItemText align="left" primary={message.message}></ListItemText>
