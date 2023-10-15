@@ -7,14 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { fetchFromAPI, getLoginSchema } from '../helpers';
 import { useDispatch } from 'react-redux';
 import { authenticate } from '../features/auth/authSlice';
-import {
-	setErrorMessage,
-	setSuccessMessage,
-} from '../features/loading/loadingSlice';
+import useAsync from '../hooks/useAsync';
 
 function LoginPage() {
-	const dispatch = useDispatch();
+	// const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const { run } = useAsync();
 
 	const initialValues = {
 		email: '',
@@ -22,21 +21,10 @@ function LoginPage() {
 	};
 	async function handleLogin(values, { setSubmitting }) {
 		setSubmitting(true);
-		const { email, password } = values;
-		try {
-			const response = await fetchFromAPI('auth/login', {
-				body: { email, password },
-			});
-			if (response && response.success) {
-				dispatch(authenticate(response));
-				dispatch(setSuccessMessage(response.message));
-				navigate('/');
-			} else {
-				dispatch(setErrorMessage(response.error));
-			}
-		} catch (err) {
-			dispatch(setErrorMessage('Please check your internet connection.!'));
-		}
+		await run(fetchFromAPI('auth/login', { body: values }), (response) => {
+			dispatch(authenticate(response));
+			navigate('/');
+		});
 	}
 	return (
 		<AuthBox>

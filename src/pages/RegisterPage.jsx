@@ -7,14 +7,12 @@ import { LoadingButton } from '@mui/lab';
 import { Formik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import { fetchFromAPI, getRegisterSchema } from '../helpers';
-import {
-	setSuccessMessage,
-	setErrorMessage,
-} from '../features/loading/loadingSlice';
+import useAsync from '../hooks/useAsync';
 
 function RegisterPage() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const { run } = useAsync();
 
 	const initialValues = {
 		username: '',
@@ -23,21 +21,15 @@ function RegisterPage() {
 	};
 	async function handleRegister(values, { setSubmitting }) {
 		setSubmitting(true);
-		const { username, email, password } = values;
-		try {
-			const response = await fetchFromAPI('auth/register', {
-				body: { username, email, password },
-			});
-			if (response && response.success) {
+		await run(
+			fetchFromAPI('auth/register', {
+				body: values,
+			}),
+			(response) => {
 				dispatch(authenticate(response));
-				dispatch(setSuccessMessage(response.message));
 				navigate('/');
-			} else {
-				dispatch(setErrorMessage(response.error));
 			}
-		} catch (err) {
-			dispatch(setErrorMessage('Please check your internet connection.!'));
-		}
+		);
 	}
 
 	return (
