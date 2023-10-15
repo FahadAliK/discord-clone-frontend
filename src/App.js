@@ -9,14 +9,19 @@ import Layout from './shared/Layout';
 import { useDispatch, useSelector } from 'react-redux';
 import { connectSocket } from './socket';
 import { setFriends, setInvitations } from './features/friends/friendsSlice';
-import AvatarWithIndicator from './components/AvatarWithIndicator';
-import AuthBox from './shared/AuthBox';
-import { setChatMessages, setChatUser } from './features/chat/chatSlice';
+import {
+	setSuccessMessage,
+	setErrorMessage,
+} from './features/loading/loadingSlice';
+import { setChatMessages } from './features/chat/chatSlice';
 import { useEffect } from 'react';
+import { Snackbar, Alert } from '@mui/material';
 
 function App() {
 	const { token } = useSelector((state) => state.auth);
-	const { messages } = useSelector((state) => state.chat);
+	const { successMessage, errorMessage } = useSelector(
+		(state) => state.loading
+	);
 	const dispatch = useDispatch();
 	useEffect(() => {
 		if (token) {
@@ -34,8 +39,39 @@ function App() {
 			});
 		}
 	}, [token, dispatch]);
+
 	return (
 		<div className="App">
+			<Snackbar
+				open={!!errorMessage}
+				autoHideDuration={2000}
+				onClose={() => dispatch(setErrorMessage(null))}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+			>
+				<Alert
+					variant="filled"
+					onClose={() => dispatch(setErrorMessage(null))}
+					severity="error"
+					sx={{ width: '100%' }}
+				>
+					{errorMessage}
+				</Alert>
+			</Snackbar>
+			<Snackbar
+				open={!!successMessage}
+				autoHideDuration={2000}
+				onClose={() => dispatch(setSuccessMessage(null))}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+			>
+				<Alert
+					variant="filled"
+					onClose={() => dispatch(setSuccessMessage(null))}
+					severity="success"
+					sx={{ width: '100%' }}
+				>
+					{successMessage}
+				</Alert>
+			</Snackbar>
 			<Router>
 				<Routes>
 					<Route element={<PrivateRoutes />}>

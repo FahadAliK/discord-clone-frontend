@@ -1,26 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import AuthBox from '../shared/AuthBox';
-import {
-	Typography,
-	TextField,
-	Button,
-	Stack,
-	Snackbar,
-	Alert,
-	Tooltip,
-} from '@mui/material';
+import { Typography, TextField, Button, Stack, Tooltip } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Formik } from 'formik';
-import { redirect, useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
-import { fetchFromAPI } from '../helpers';
+import { useNavigate } from 'react-router-dom';
+import { fetchFromAPI, getLoginSchema } from '../helpers';
 import { useDispatch } from 'react-redux';
 import { authenticate } from '../features/auth/authSlice';
+import {
+	setErrorMessage,
+	setSuccessMessage,
+} from '../features/loading/loadingSlice';
 
 function LoginPage() {
-	const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
-	const [openSuccessSnackbar, setOpenSuccessSnackbar] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
@@ -31,50 +23,23 @@ function LoginPage() {
 	async function handleLogin(values, { setSubmitting }) {
 		setSubmitting(true);
 		const { email, password } = values;
-		const response = await fetchFromAPI('auth/login', {
-			body: { email, password },
-		});
-		if (response.success) {
-			setOpenSuccessSnackbar(true);
-			dispatch(authenticate(response));
-			navigate('/');
-		} else {
-			setOpenErrorSnackbar(true);
-			setErrorMessage(response.error);
+		try {
+			const response = await fetchFromAPI('auth/login', {
+				body: { email, password },
+			});
+			if (response && response.success) {
+				dispatch(authenticate(response));
+				dispatch(setSuccessMessage(response.message));
+				navigate('/');
+			} else {
+				dispatch(setErrorMessage(response.error));
+			}
+		} catch (err) {
+			dispatch(setErrorMessage('Please check your internet connection.!'));
 		}
 	}
 	return (
 		<AuthBox>
-			<Snackbar
-				open={openErrorSnackbar}
-				autoHideDuration={2000}
-				onClose={() => setOpenErrorSnackbar(false)}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			>
-				<Alert
-					variant="filled"
-					onClose={() => setOpenErrorSnackbar(false)}
-					severity="error"
-					sx={{ width: '100%' }}
-				>
-					{errorMessage}
-				</Alert>
-			</Snackbar>
-			<Snackbar
-				open={openSuccessSnackbar}
-				autoHideDuration={2000}
-				onClose={() => setOpenSuccessSnackbar(false)}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			>
-				<Alert
-					variant="filled"
-					onClose={() => setOpenSuccessSnackbar(false)}
-					severity="success"
-					sx={{ width: '100%' }}
-				>
-					Successfully logged in to your account.
-				</Alert>
-			</Snackbar>
 			<Typography variant="h3" sx={{ color: 'white' }}>
 				Discord Clone
 			</Typography>
@@ -83,19 +48,7 @@ function LoginPage() {
 			</Typography>
 			<Formik
 				initialValues={initialValues}
-				validationSchema={Yup.object().shape({
-					email: Yup.string()
-						.email('Invalid email.')
-						.matches(
-							/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-							'Invalid email.'
-						)
-						.required('Email required'),
-					password: Yup.string()
-						.min(6, 'Password must be 6 characters long.')
-						.max(12, 'Password must be atmost 12 characters long.')
-						.required('Password is required.'),
-				})}
+				validationSchema={getLoginSchema()}
 				onSubmit={(values, { setSubmitting }) =>
 					handleLogin(values, { setSubmitting })
 				}

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { useSelector } from 'react-redux';
 
 function storeAuthState(authState) {
 	localStorage.setItem('user', JSON.stringify(authState));

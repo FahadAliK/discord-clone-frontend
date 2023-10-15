@@ -1,26 +1,18 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import { authenticate } from '../features/auth/authSlice';
 import AuthBox from '../shared/AuthBox';
-import {
-	Typography,
-	TextField,
-	Button,
-	Stack,
-	Snackbar,
-	Alert,
-	Tooltip,
-} from '@mui/material';
+import { Typography, TextField, Button, Stack, Tooltip } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Formik } from 'formik';
-import { redirect, useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
-import { fetchFromAPI } from '../helpers';
+import { useNavigate } from 'react-router-dom';
+import { fetchFromAPI, getRegisterSchema } from '../helpers';
+import {
+	setSuccessMessage,
+	setErrorMessage,
+} from '../features/loading/loadingSlice';
 
 function RegisterPage() {
-	const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
-	const [openSuccessSnackbar, setOpenSuccessSnackbar] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
@@ -32,51 +24,24 @@ function RegisterPage() {
 	async function handleRegister(values, { setSubmitting }) {
 		setSubmitting(true);
 		const { username, email, password } = values;
-		const response = await fetchFromAPI('auth/register', {
-			body: { username, email, password },
-		});
-		if (response.success) {
-			setOpenSuccessSnackbar(true);
-			dispatch(authenticate(response));
-			navigate('/');
-		} else {
-			setErrorMessage(response.error);
-			setOpenErrorSnackbar(true);
+		try {
+			const response = await fetchFromAPI('auth/register', {
+				body: { username, email, password },
+			});
+			if (response && response.success) {
+				dispatch(authenticate(response));
+				dispatch(setSuccessMessage(response.message));
+				navigate('/');
+			} else {
+				dispatch(setErrorMessage(response.error));
+			}
+		} catch (err) {
+			dispatch(setErrorMessage('Please check your internet connection.!'));
 		}
 	}
+
 	return (
 		<AuthBox>
-			<Snackbar
-				open={openErrorSnackbar}
-				autoHideDuration={2000}
-				onClose={() => setOpenErrorSnackbar(false)}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			>
-				<Alert
-					variant="filled"
-					onClose={() => setOpenErrorSnackbar(false)}
-					severity="error"
-					sx={{ width: '100%' }}
-				>
-					{/* Email already in use, Please log in. */}
-					{errorMessage}
-				</Alert>
-			</Snackbar>
-			<Snackbar
-				open={openSuccessSnackbar}
-				autoHideDuration={2000}
-				onClose={() => setOpenSuccessSnackbar(false)}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			>
-				<Alert
-					variant="filled"
-					onClose={() => setOpenSuccessSnackbar(false)}
-					severity="success"
-					sx={{ width: '100%' }}
-				>
-					Successfully registered to app.
-				</Alert>
-			</Snackbar>
 			<Typography variant="h3" sx={{ color: 'white' }}>
 				Discord Clone
 			</Typography>
@@ -85,27 +50,7 @@ function RegisterPage() {
 			</Typography>
 			<Formik
 				initialValues={initialValues}
-				validationSchema={Yup.object().shape({
-					username: Yup.string()
-						.required('Username required.')
-						.max(
-							12,
-							'Username must be less than or equal to 12 characters long.'
-						)
-						.min(3, 'Username must be at least 3 characters long.'),
-					email: Yup.string()
-						.email('Invalid email.')
-						.matches(
-							/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-							'Invalid email.'
-						)
-						.required('Email required'),
-
-					password: Yup.string()
-						.min(6, 'Password must be atleast 6 characters long.')
-						.max(12, 'Password must be atmost 12 characters long.')
-						.required('Password is required.'),
-				})}
+				validationSchema={getRegisterSchema()}
 				onSubmit={(values, { setSubmitting }) =>
 					handleRegister(values, { setSubmitting })
 				}
